@@ -33,13 +33,24 @@ public:
 class Bird : public Object
 {
 public:
-    Bird();
+    Bird(){
+        bbox = {
+            0,
+            0,
+            10,
+            11 // 10 + 2 - 1;
+        };
+        pos.y = 9.0f;
+    }
     void Tick(float dt) override;
     void Render() override;
 
+    Vector2 GetVelocity() const { return velocity; }
+    bool IsDead() const { return dead; }
+
 private:
-    float x, y;
-    float velocity;
+    Vector2 velocity;
+    bool dead = false;
 };
 
 class Pipe : public Object
@@ -92,26 +103,8 @@ int main()
     // Ici on initialise les différents acteurs du jeu : Bird, Pipe, Score.
     #pragma region Bird
     // bird
-
-    // y position (float)
-    float by = 9.0f;
-    // velocity
-    float bv = 0.0f;            
-
-    // top (int)
-    int bt = 0;
-
-    // bottom (int)
-    int bb = 0;
-
-    // left
-    int bl = 10;
-
-    // right
-    int br = 10 + 2 - 1;
-
-    // 0 = alive, 1 = dead
-    int dead = 0;
+       
+    
 
     // spawn timer
     float t = 0.0f;
