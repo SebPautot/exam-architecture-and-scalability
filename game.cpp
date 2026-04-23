@@ -13,7 +13,10 @@
 
 int main()
 {
-    HANDLE h = GetStdHandle(STD_INPUT_HANDLE);   // input
+    // On setup la console pour la lecture de l'entrée clavier, en désactivant le mode ligne et l'écho pour pouvoir détecter les appuis de touches sans attendre la touche entrée et sans afficher les caractères tapés.
+    #pragma region Console setup
+
+    HANDLE h = GetStdHandle(STD_INPUT_HANDLE);   // input 
     HANDLE h2 = GetStdHandle(STD_OUTPUT_HANDLE); // output
     if (h == INVALID_HANDLE_VALUE)
     {
@@ -46,29 +49,64 @@ int main()
     if (GetConsoleMode(h2, &m3))
         SetConsoleMode(h2, m3 | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 
-    // bird
-    float by = 9.0f;            // y position (float)
-    float bv = 0.0f;            // velocity
-    int bt = 0;                 // top (int)
-    int bb = 0;                 // bottom (int)
-    int bl = 10;                // left
-    int br = 10 + 2 - 1;        // right
-    int dead = 0;               // 0 = alive, 1 = dead
-    float t = 0.0f;             // spawn timer
-    unsigned long long sc = 0;  // current score
-    unsigned long long bsc = 0; // best score
-    // hud padding
-    int lp = 0; // left padding
-    int rp = 0; // right padding
-    // pipe data
-    std::vector<float> px; // x positions
-    std::vector<int> pg;   // gap tops
-    std::vector<int> ps;   // scored flag (0 or 1)
+    #pragma endregion
 
+    // Ici on initialise les différents acteurs du jeu : Bird, Pipe, Score.
+    #pragma region Bird
+    // bird
+
+    // y position (float)
+    float by = 9.0f;
+    // velocity
+    float bv = 0.0f;            
+
+    // top (int)
+    int bt = 0;
+
+    // bottom (int)
+    int bb = 0;
+
+    // left
+    int bl = 10;
+
+    // right
+    int br = 10 + 2 - 1;
+
+    // 0 = alive, 1 = dead
+    int dead = 0;
+
+    // spawn timer
+    float t = 0.0f;
+
+    // current score
+    unsigned long long sc = 0;
+
+    // best score
+    unsigned long long bsc = 0;
+
+    // hud padding
+
+    // left padding
+    int lp = 0;
+    // right hud padding
+    int rp = 0; 
+    // pipe data |  x positions
+    std::vector<float> px;
+    // pipe data | gap tops
+    std::vector<int> pg;
+
+    // pipe data | scored flag (0 or 1)
+    std::vector<int> ps;  
+
+    #pragma endregion
+
+    #pragma region Random setup
     // rng
     std::mt19937 rng(std::random_device{}());
     std::uniform_int_distribution<int> d(2, 20 - 6 - 2); // gap position
+    #pragma endregion
 
+    #pragma region High score setup
     INPUT_RECORD rec;
     DWORD ne = 0;
 
@@ -84,12 +122,16 @@ int main()
             bsc = 0; // reset if read failed
     }
     fin.close(); // close the file
+    #pragma endregion
 
+    // delta time setup, variable will be used to calculate deltatime in the main loop using current time - previous (prev) time
     auto prev = std::chrono::steady_clock::now();
 
     // main loop
+    #pragma region Main loop
     while (dead == 0)
     {
+        #pragma region Delta time
         // delta time
         auto now = std::chrono::steady_clock::now();
         float dt = std::chrono::duration<float>(now - prev).count();
@@ -97,6 +139,9 @@ int main()
         if (dt > 0.1f)
             dt = 0.1f; // clamp delta time
 
+        #pragma endregion
+
+        #pragma region Input
         // read input events
         DWORD nEvents = 0;
         if (!GetNumberOfConsoleInputEvents(h, &nEvents))
@@ -126,18 +171,23 @@ int main()
                 } // end if key down
             } // end if key event
         } // end for each event
+        #pragma endregion
 
+        #pragma region Bird actor tick
         bv = bv + 42.0f * dt;
         by = by + bv * dt;
+        #pragma endregion
 
+        #pragma region Pipe actor tick
         t = t + dt;
         if (t >= 1.4f)
         {
-            t = t - 1.4f;
+            t = t - 1.4f; // wtf
             px.push_back(50.0f);
             pg.push_back(d(rng));
             ps.push_back(0);
         }
+       
 
         for (int i = 0; i < (int)px.size(); i++) // loop over all pipes
         {
@@ -152,8 +202,9 @@ int main()
                     bsc = sc;
             }
         }
+        #pragma endregion
 
-        for (int i = (int)px.size() - 1; i >= 0; i--)
+        for (int i = (int)px.size() - 1; i >= 0; i--) // reverse loop to safely remove pipes that are off screen
         {
             if (px[i] + 6.0f < 0.0f)
             {
@@ -163,6 +214,7 @@ int main()
             }
         }
 
+        #pragma region Collision detection
         // collision
         bt = (int)std::floor(by);
         bb = bt + 2 - 1;
@@ -173,7 +225,8 @@ int main()
         {
             dead = 1;
         }
-
+        #pragma endregion
+        
         if (!dead)
         {
             for (int i = 0; i < (int)px.size(); i++)
@@ -198,11 +251,13 @@ int main()
             }
         }
 
-        if (dead != 0)
+        if (dead != 0) // if dead we dont render, but this is also the while loop exit condition, we should reorder operations to avoid doing this
             break;
 
+        // frame setup
         std::vector<std::string> frame(20, std::string(50, ' '));
 
+        #pragma region Pipe rendering
         for (int i = 0; i < (int)px.size(); i++)
         {
             int pl = (int)std::floor(px[i]);
@@ -221,6 +276,10 @@ int main()
             }
         }
 
+        #pragma endregion
+
+        #pragma region Bird rendering
+
         for (int dy = 0; dy < 2; dy++)
         {
             int y = bt + dy;
@@ -233,6 +292,10 @@ int main()
                     frame[y][x] = 'B';
             }
         }
+
+        #pragma endregion
+
+        #pragma region HUD rendering
 
         std::string scoreText = "Score: " + std::to_string(sc) + "   Best: " + std::to_string(bsc);
         if (scoreText.size() > 50)
@@ -254,7 +317,7 @@ int main()
                 }
                 else if (c == 'B')
                 {
-                    std::cout << "\x1b[33mB\x1b[0m";
+                    std::cout << "\x1b[33mB\x1b[0m"; // render bird yellow
                 }
                 else
                 {
@@ -269,18 +332,22 @@ int main()
         std::cout << "+" << std::string(50, '-') << "+" << "\n";
         std::cout.flush();
 
-        float ft = std::chrono::duration<float>(std::chrono::steady_clock::now() - now).count();
+        float ft = std::chrono::duration<float>(std::chrono::steady_clock::now() - now).count(); 
         if (ft < 1.0f / 30.0f)
         {
-            std::this_thread::sleep_for(std::chrono::duration<float>(1.0f / 30.0f - ft));
+            std::this_thread::sleep_for(std::chrono::duration<float>(1.0f / 30.0f - ft)); // why are using delta time if we force 30 fps anyway
         }
     }
 
+    #pragma endregion
+
+    #pragma region Save high score
     // save best score to file
     std::ofstream fout("best-score.txt", std::ios::trunc);
     if (fout)
         fout << bsc; // write best score
     fout.close();    // close the file
+    #pragma endregion
 
     // restore original console mode
     SetConsoleMode(h, m);
