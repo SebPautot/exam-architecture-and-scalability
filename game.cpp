@@ -47,15 +47,31 @@ public:
         };
         pos.y = 9.0f;
     }
-    void Tick(float dt) override;
+    void Tick(float dt) override {
+        // collision
+        bbox.top = (int)std::floor(pos.y);
+        bbox.bottom = bbox.top + 1;
+
+
+    }
     void Render() override;
 
     Vector2 GetVelocity() const { return velocity; }
     bool IsDead() const { return dead; }
 
+    bool IsOutOfBounds() {
+        // check wall
+        if (bbox.top < 0 || bbox.bottom >= 20)
+        {
+            dead = 1;
+        }
+    }
+
 private:
     Vector2 velocity;
     bool dead = false;
+
+
 };
 
 class Pipe : public Object
@@ -240,16 +256,7 @@ int main()
         }
 
         #pragma region Collision detection
-        // collision
-        bt = (int)std::floor(by);
-        bb = bt + 2 - 1;
-        bl = 10;         // same every frame
-        br = 10 + 2 - 1; // same every frame
-        // check wall
-        if (bt < 0 || bb >= 20)
-        {
-            dead = 1;
-        }
+        
         #pragma endregion
         
         if (!dead)
