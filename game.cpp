@@ -62,6 +62,8 @@ public:
     Vector2 GetAccelerationConstant() const { return constant_acceleration; }
     bool IsDead() const { return dead; }
 
+    void Kill() { dead = true; }
+
     bool IsOutOfBounds() {
         // check wall
         if (bbox.top < 0 || bbox.bottom >= 20)
@@ -80,6 +82,30 @@ private:
         velocity.y += constant_acceleration.y * dt;
         pos.x += velocity.x * dt;
         pos.y += velocity.y * dt;
+    }
+
+    void CollisionDetection(std::vector<Pipe> pipes)
+    {
+        for (int i = 0; i < (int)pipes.size(); i++)
+        {
+            int pl = (int)std::floor(pipes[i].pos.x);
+            int pr = pl + 6 - 1;
+
+            if (bbox.right >= pl && bbox.left <= pr)
+            {
+                for (int y = bbox.top; y <= bbox.bottom; y++)
+                {
+                    if (y < pipes[i].GetGap() || y >= pipes[i].GetGap() + 6)
+                    {
+                        Kill();
+                        break;
+                    }
+                }
+            }
+
+            if (IsDead())
+                break;
+        }
     }
     
 
@@ -102,6 +128,8 @@ public:
 
     void Score() { scored = true; }
     bool IsScored() const { return scored; }
+    int GetGap() const { return gapTop; }
+    void SetGap(int gap) { gapTop = gap; }
 private:
     int gapTop;
     bool scored = false;
@@ -269,26 +297,7 @@ int main()
         
         if (!dead)
         {
-            for (int i = 0; i < (int)px.size(); i++)
-            {
-                int pl = (int)std::floor(px[i]);
-                int pr = pl + 6 - 1;
-
-                if (br >= pl && bl <= pr)
-                {
-                    for (int y = bt; y <= bb; y++)
-                    {
-                        if (y < pg[i] || y >= pg[i] + 6)
-                        {
-                            dead = 1;
-                            break;
-                        }
-                    }
-                }
-
-                if (dead != 0)
-                    break;
-            }
+            
         }
 
         if (dead != 0) // if dead we dont render, but this is also the while loop exit condition, we should reorder operations to avoid doing this
