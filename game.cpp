@@ -63,6 +63,12 @@ class Pipe : public Object
 public:
     void Tick(float dt) override;
     void Render() override;
+
+    void Score() { scored = true; }
+    bool IsScored() const { return scored; }
+private:
+    int gapTop;
+    bool scored = false;
 };
 
 int main()
@@ -105,9 +111,6 @@ int main()
 
     #pragma endregion
 
-    // Ici on initialise les différents acteurs du jeu : Bird, Pipe, Score.
-    #pragma region Bird
-    // bird
        
     
 
@@ -119,15 +122,6 @@ int main()
 
     // best score
     unsigned long long bsc = 0;
-
-
-    // pipe data |  x positions
-    std::vector<float> px;
-    // pipe data | gap tops
-    std::vector<int> pg;
-
-    // pipe data | scored flag (0 or 1)
-    std::vector<int> ps;  
 
     #pragma endregion
 
