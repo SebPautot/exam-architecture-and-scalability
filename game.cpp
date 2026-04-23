@@ -53,6 +53,8 @@ public:
         // collision
         bbox.top = (int)std::floor(pos.y);
         bbox.bottom = bbox.top + 1;
+
+        PhysicsIntegration(dt);
     }
     void Render() override;
 
@@ -87,7 +89,15 @@ private:
 class Pipe : public Object
 {
 public:
-    void Tick(float dt) override;
+    void Tick(float dt) override{
+        pos.x -= 18.0f * dt;
+
+        int pipeRight = (int)std::floor(pos.x) + 6 - 1;
+        if (!scored && pipeRight < 10)
+        {
+            Score();
+        }
+    }
     void Render() override;
 
     void Score() { scored = true; }
@@ -239,16 +249,7 @@ int main()
 
         for (int i = 0; i < (int)px.size(); i++) // loop over all pipes
         {
-            px[i] = px[i] - 18.0f * dt; // move pipe left
-
-            int pipeRight = (int)std::floor(px[i]) + 6 - 1;
-            if (ps[i] == 0 && pipeRight < 10)
-            {
-                ps[i] = 1;
-                sc = sc + 1;
-                if (sc > bsc)
-                    bsc = sc;
-            }
+            
         }
         #pragma endregion
 
