@@ -30,6 +30,13 @@ private:
     float velocity;
 };
 
+class Pipe : public Object
+{
+public:
+    void Tick(float dt) override;
+    void Render() override;
+};
+
 int main()
 {
     // On setup la console pour la lecture de l'entrée clavier, en désactivant le mode ligne et l'écho pour pouvoir détecter les appuis de touches sans attendre la touche entrée et sans afficher les caractères tapés.
