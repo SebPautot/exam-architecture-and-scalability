@@ -23,6 +23,9 @@ struct Vector2 {
 class Object
 {
 public:
+    BoundingBox bbox = {0, 0, 0, 0}; // default bounding box, can be overridden by derived classes
+    Vector2 pos = {0.0f, 0.0f};
+
     virtual void Tick(float dt) = 0;
     virtual void Render() = 0;
 };
