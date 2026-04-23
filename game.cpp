@@ -18,6 +18,17 @@ public:
     virtual void Render() = 0;
 };
 
+class Bird : public Object
+{
+public:
+    Bird();
+    void Tick(float dt) override;
+    void Render() override;
+
+private:
+    float x, y;
+    float velocity;
+};
 
 int main()
 {
