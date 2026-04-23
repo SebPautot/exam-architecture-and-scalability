@@ -20,6 +20,11 @@ public:
 struct Vector2 {
     float x, y;
 };
+
+struct HUD {
+    Vector2 padding;
+};
+
 class Object
 {
 public:
@@ -115,12 +120,7 @@ int main()
     // best score
     unsigned long long bsc = 0;
 
-    // hud padding
 
-    // left padding
-    int lp = 0;
-    // right hud padding
-    int rp = 0; 
     // pipe data |  x positions
     std::vector<float> px;
     // pipe data | gap tops
