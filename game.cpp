@@ -11,6 +11,15 @@
 #include <cmath>
 #include <fstream>
 
+struct BoundingBox
+{
+public:
+    int top, bottom, left, right;
+};
+
+struct Vector2 {
+    float x, y;
+};
 class Object
 {
 public:
