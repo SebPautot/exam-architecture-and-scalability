@@ -45,31 +45,41 @@ public:
             10,
             11 // 10 + 2 - 1;
         };
+        constant_acceleration.y = 42.0f;
         pos.y = 9.0f;
     }
     void Tick(float dt) override {
+
         // collision
         bbox.top = (int)std::floor(pos.y);
         bbox.bottom = bbox.top + 1;
-
-
     }
     void Render() override;
 
     Vector2 GetVelocity() const { return velocity; }
+    Vector2 GetAccelerationConstant() const { return constant_acceleration; }
     bool IsDead() const { return dead; }
 
     bool IsOutOfBounds() {
         // check wall
         if (bbox.top < 0 || bbox.bottom >= 20)
         {
-            dead = 1;
+            true;
         }
     }
 
 private:
     Vector2 velocity;
+    Vector2 constant_acceleration;
     bool dead = false;
+
+    void PhysicsIntegration(float dt){
+        velocity.x += constant_acceleration.x * dt;
+        velocity.y += constant_acceleration.y * dt;
+        pos.x += velocity.x * dt;
+        pos.y += velocity.y * dt;
+    }
+    
 
 
 };
@@ -214,10 +224,7 @@ int main()
         } // end for each event
         #pragma endregion
 
-        #pragma region Bird actor tick
-        bv = bv + 42.0f * dt;
-        by = by + bv * dt;
-        #pragma endregion
+       
 
         #pragma region Pipe actor tick
         t = t + dt;
